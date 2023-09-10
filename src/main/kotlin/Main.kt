@@ -4,7 +4,7 @@ import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
 fun main(args: Array<String>) {
-    val files = Path(args[1]).listDirectoryEntries()
+    val files = Path(args[0]).listDirectoryEntries()
     files.forEach {
         when {
             it.isDirectory() -> traverse(it)

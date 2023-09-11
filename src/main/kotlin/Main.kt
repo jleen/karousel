@@ -1,30 +1,32 @@
-import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.*
 
 val VIEW_SIZE: Int = 0
 val PREVIEW_SIZE: Int = 0
 
+// TODO: This can't be the right way to do this.
+var sourceRoot: String = ""
+var targetRoot: String = ""
+
 fun main(args: Array<String>) {
-    traverseDirectory(Path(args[0]))
+    sourceRoot = args[0]
+    targetRoot = args[1]
+    traverseDirectory(SourcePath(Path(args[0])))
 }
 
-fun traverseDirectory(dir: Path) {
+fun traverseDirectory(dir: SourcePath) {
     println("Traversing directory $dir")
     renderDirectoryPage(dir)
 
-    val files = dir.listDirectoryEntries()
+    val files = dir.path.listDirectoryEntries()
     files.forEach {
         when {
-            it.isDirectory() -> traverseDirectory(it)
-            it.extension == "jpeg" -> traversePhoto(it)
+            it.isDirectory() -> traverseDirectory(SourcePath(it))
+            it.extension == "jpeg" -> traversePhoto(SourcePath(it))
         }
     }
 }
 
-fun traversePhoto(photo: Path) {
+fun traversePhoto(photo: SourcePath) {
     println("Handling photo $photo")
     renderPhotoPage(photo)
     renderPreview(photo)
@@ -32,30 +34,41 @@ fun traversePhoto(photo: Path) {
     renderFull(photo)
 }
 
-fun renderFull(photo: Path) {
+fun renderFull(photo: SourcePath) {
     copyPhoto(photo)
 }
 
-fun renderPreview(photo: Path) {
+fun renderPreview(photo: SourcePath) {
     resizePhoto(photo, PREVIEW_SIZE)
 }
 
-fun renderView(photo: Path) {
+fun renderView(photo: SourcePath) {
     resizePhoto(photo, VIEW_SIZE)
 }
 
-fun renderPhotoPage(photo: Path) {
-    TODO("Not yet implemented")
+fun renderPhotoPage(photo: SourcePath) {
+    val str = photo.toString()
+    println("Rendering photo page for $photo")
 }
 
-fun renderDirectoryPage(dir: Path) {
-    TODO("Not yet implemented")
+fun renderDirectoryPage(dir: SourcePath) {
+    println("Rendering directory page for $dir")
 }
 
-fun copyPhoto(photo: Path) {
-    TODO("Not yet implemented")
+fun isStale(source: SourcePath, target: TargetPath): Boolean {
+    return !target.path.exists()
+            || target.path.getLastModifiedTime() < source.path.getLastModifiedTime()
+
+}
+fun copyPhoto(source: SourcePath) {
+    val target = source.toTarget();
+    if (isStale(source, target))
+        println("Copying $source to $target")
+        //source.path.copyTo(target.path)
 }
 
-fun resizePhoto(photo: Path, previewSize: Int) {
-    TODO("Not yet implemented")
+fun resizePhoto(source: SourcePath, size: Int) {
+    val target = source.toTarget();
+    if (isStale(source, target))
+        println("Resizing $source to $target at size $size")
 }

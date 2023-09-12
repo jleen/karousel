@@ -18,6 +18,7 @@ fun main(args: Array<String>) {
 
 fun traverseDirectory(dir: SourcePath) {
     println("Traversing directory $dir")
+    createTargetDirectory(dir)
     renderDirectoryPage(dir)
 
     val files = dir.path.listDirectoryEntries()
@@ -29,6 +30,8 @@ fun traverseDirectory(dir: SourcePath) {
     }
 }
 
+fun createTargetDirectory(dir: SourcePath) = dir.toTarget().path.createDirectories()
+
 fun traversePhoto(photo: SourcePath) {
     println("Handling photo $photo")
     renderPhotoPage(photo)
@@ -37,20 +40,11 @@ fun traversePhoto(photo: SourcePath) {
     renderFull(photo)
 }
 
-fun renderFull(photo: SourcePath) {
-    copyPhoto(photo)
-}
-
-fun renderPreview(photo: SourcePath) {
-    resizePhoto(photo, Size.THUMBNAIL)
-}
-
-fun renderView(photo: SourcePath) {
-    resizePhoto(photo, Size.VIEW)
-}
+fun renderFull(photo: SourcePath) = copyPhoto(photo)
+fun renderPreview(photo: SourcePath) = resizePhoto(photo, Size.THUMBNAIL)
+fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
 fun renderPhotoPage(photo: SourcePath) {
-    val str = photo.toString()
     println("Rendering photo page for $photo")
 }
 
@@ -58,16 +52,17 @@ fun renderDirectoryPage(dir: SourcePath) {
     println("Rendering directory page for $dir")
 }
 
-fun isStale(source: SourcePath, target: TargetPath): Boolean {
-    return !target.path.exists()
-            || target.path.getLastModifiedTime() < source.path.getLastModifiedTime()
+fun isStale(source: SourcePath, target: TargetPath): Boolean =
+    !target.path.exists() || target.path.getLastModifiedTime() < source.path.getLastModifiedTime()
 
-}
 fun copyPhoto(source: SourcePath) {
     val target = source.toTarget()
-    if (isStale(source, target))
+    if (isStale(source, target)) {
         println("Copying $source to $target")
-        //source.path.copyTo(target.path)
+        source.path.copyTo(target.path)
+    } else {
+        println("Skipping up-to-date $target")
+    }
 }
 
 fun resizePhoto(source: SourcePath, size: Size) {

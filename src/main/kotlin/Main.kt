@@ -21,7 +21,6 @@ fun main(args: Array<String>) {
 }
 
 fun traverseDirectory(dir: SourcePath) {
-    println("Traversing directory $dir")
     createTargetDirectory(dir)
     renderDirectoryPage(dir)
 
@@ -37,7 +36,6 @@ fun traverseDirectory(dir: SourcePath) {
 fun createTargetDirectory(dir: SourcePath) = dir.toTarget().path.createDirectories()
 
 fun traversePhoto(photo: SourcePath) {
-    println("Handling photo $photo")
     renderPhotoPage(photo)
     renderPreview(photo)
     renderView(photo)
@@ -49,11 +47,12 @@ fun renderPreview(photo: SourcePath) = resizePhoto(photo, Size.THUMBNAIL)
 fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
 fun renderPhotoPage(photo: SourcePath) {
-    println("Rendering photo page for $photo")
+    println("* ${photo.toTarget().toString().substringBeforeLast(".")}.html")
 }
 
 fun renderDirectoryPage(dir: SourcePath) {
-    println("Rendering directory page for $dir")
+    val index = dir.toTarget().resolve("index.html")
+    println("* $index")
 }
 
 fun isStale(source: SourcePath, target: TargetPath): Boolean =
@@ -62,17 +61,16 @@ fun isStale(source: SourcePath, target: TargetPath): Boolean =
 fun copyPhoto(source: SourcePath) {
     val target = source.toTarget()
     if (isStale(source, target)) {
-        println("Copying $source to $target")
         source.path.copyTo(target.path)
+        println("* $target")
     } else {
-        println("Skipping up-to-date $target")
+        println("  $target")
     }
 }
 
 fun resizePhoto(source: SourcePath, size: Size) {
     val target = source.toTarget().withSuffix(size.suffix)
     if (isStale(source, target)) {
-        println("Resizing $source to $target at ${size.height}x${size.width}")
         val original = ImageIO.read(source.path.toFile())
         val (width, height) = size.computeScaledSize(original.width, original.height)
         val resized = BufferedImage(width, height, original.type)
@@ -81,8 +79,9 @@ fun resizePhoto(source: SourcePath, size: Size) {
         graph.drawImage(original,0, 0, width, height, null)
         graph.dispose()
         ImageIO.write(resized, "jpg", target.path.toFile())
+        println("* $target")
     } else {
-        println("Skipping up-to-date $target")
+        println("  $target")
     }
 }
 

@@ -18,7 +18,7 @@ var targetRoot: String = ""
 fun main(args: Array<String>) {
     sourceRoot = args[0]
     targetRoot = args[1]
-    println(Paths.get("").toAbsolutePath())
+    copyCss()
     traverseDirectory(SourcePath(Path(args[0])))
 }
 
@@ -50,7 +50,7 @@ fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
 fun renderPhotoPage(photo: SourcePath) {
     val target = TargetPath(Path(photo.toTarget().toString().substringBeforeLast(".") + ".html"))
-    if (isStale(photo, target)) {
+    if (true) { //isStale(photo, target)) {
         templatePhotoPage(target, photo.toTarget())
         println("* $target")
     } else {
@@ -66,8 +66,18 @@ fun renderDirectoryPage(dir: SourcePath) {
 fun isStale(source: SourcePath, target: TargetPath): Boolean =
     !target.path.exists() || target.path.getLastModifiedTime() < source.path.getLastModifiedTime()
 
+fun copyCss() {
+    val source = SourcePath(Path("carousel.css"))
+    val target = TargetPath(Path(targetRoot).resolve("carousel.css"))
+    conditionallyCopy(source, target)
+}
+
 fun copyPhoto(source: SourcePath) {
     val target = source.toTarget()
+    conditionallyCopy(source, target)
+}
+
+fun conditionallyCopy(source: SourcePath, target: TargetPath) {
     if (isStale(source, target)) {
         source.path.copyTo(target.path)
         println("* $target")

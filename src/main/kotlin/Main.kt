@@ -1,7 +1,10 @@
 import kotlin.io.path.*
 
-val VIEW_SIZE: Int = 0
-val PREVIEW_SIZE: Int = 0
+enum class Size(val width: Int, val height: Int, val suffix: String) {
+    VIEW(500, 700, "small"),
+    THUMBNAIL(200, 200, "thumbnail"),
+    DIRECTORY(100, 100, "dirthumb"),
+}
 
 // TODO: This can't be the right way to do this.
 var sourceRoot: String = ""
@@ -39,11 +42,11 @@ fun renderFull(photo: SourcePath) {
 }
 
 fun renderPreview(photo: SourcePath) {
-    resizePhoto(photo, PREVIEW_SIZE)
+    resizePhoto(photo, Size.THUMBNAIL)
 }
 
 fun renderView(photo: SourcePath) {
-    resizePhoto(photo, VIEW_SIZE)
+    resizePhoto(photo, Size.VIEW)
 }
 
 fun renderPhotoPage(photo: SourcePath) {
@@ -61,14 +64,14 @@ fun isStale(source: SourcePath, target: TargetPath): Boolean {
 
 }
 fun copyPhoto(source: SourcePath) {
-    val target = source.toTarget();
+    val target = source.toTarget()
     if (isStale(source, target))
         println("Copying $source to $target")
         //source.path.copyTo(target.path)
 }
 
-fun resizePhoto(source: SourcePath, size: Int) {
-    val target = source.toTarget();
+fun resizePhoto(source: SourcePath, size: Size) {
+    val target = source.toTarget().withSuffix(size.suffix)
     if (isStale(source, target))
-        println("Resizing $source to $target at size $size")
+        println("Resizing $source to $target at ${size.height}x${size.width}")
 }

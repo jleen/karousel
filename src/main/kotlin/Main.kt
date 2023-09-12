@@ -1,3 +1,7 @@
+import java.awt.RenderingHints.KEY_INTERPOLATION
+import java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
+import java.awt.image.BufferedImage
+import javax.imageio.ImageIO
 import kotlin.io.path.*
 
 enum class Size(val width: Int, val height: Int, val suffix: String) {
@@ -67,6 +71,28 @@ fun copyPhoto(source: SourcePath) {
 
 fun resizePhoto(source: SourcePath, size: Size) {
     val target = source.toTarget().withSuffix(size.suffix)
-    if (isStale(source, target))
+    if (isStale(source, target)) {
         println("Resizing $source to $target at ${size.height}x${size.width}")
+        val original = ImageIO.read(source.path.toFile())
+        val (width, height) = size.computeScaledSize(original.width, original.height)
+        val resized = BufferedImage(width, height, original.type)
+        val graph = resized.createGraphics()
+        graph.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR)
+        graph.drawImage(original,0, 0, width, height, null)
+        graph.dispose()
+        ImageIO.write(resized, "jpg", target.path.toFile())
+    } else {
+        println("Skipping up-to-date $target")
+    }
+}
+
+private fun Size.computeScaledSize(width: Int, height: Int): Pair<Int, Int> {
+    val shrinkWidth = width.toDouble() / this.width
+    val shrinkHeight = height.toDouble() / this.height
+    // Explicitly return at least one target dimension (prioritizing height)
+    // to avoid embarrassing floating point off-by-one.
+    if (shrinkHeight >= shrinkWidth)
+        return Pair((width / shrinkWidth).toInt(), this.height)
+    else
+        return Pair(this.width, (height / shrinkWidth).toInt())
 }

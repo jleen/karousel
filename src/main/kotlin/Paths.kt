@@ -1,7 +1,6 @@
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.extension
-import kotlin.io.path.nameWithoutExtension
 
 class SourcePath(val path: Path) {
     fun toTarget(): TargetPath {
@@ -20,7 +19,7 @@ class TargetPath(val path: Path) : Path by path {
 
     override fun toString() = path.toString()
     fun withSuffix(suffix: String): TargetPath {
-        val nameWithSuffix = "${path.nameWithoutExtension}_$suffix.${path.extension}"
+        val nameWithSuffix = "${path.toString().substringBeforeLast(".")}_$suffix.${path.extension}"
         return TargetPath(Path(nameWithSuffix))
     }
 }

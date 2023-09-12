@@ -1,6 +1,7 @@
 import java.awt.RenderingHints.KEY_INTERPOLATION
 import java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
 import java.awt.image.BufferedImage
+import java.nio.file.Paths
 import javax.imageio.ImageIO
 import kotlin.io.path.*
 
@@ -17,6 +18,7 @@ var targetRoot: String = ""
 fun main(args: Array<String>) {
     sourceRoot = args[0]
     targetRoot = args[1]
+    println(Paths.get("").toAbsolutePath())
     traverseDirectory(SourcePath(Path(args[0])))
 }
 
@@ -47,7 +49,13 @@ fun renderPreview(photo: SourcePath) = resizePhoto(photo, Size.THUMBNAIL)
 fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
 fun renderPhotoPage(photo: SourcePath) {
-    println("* ${photo.toTarget().toString().substringBeforeLast(".")}.html")
+    val target = TargetPath(Path(photo.toTarget().toString().substringBeforeLast(".") + ".html"))
+    if (isStale(photo, target)) {
+        templatePhotoPage(target, photo.toTarget())
+        println("* $target")
+    } else {
+        println("  $target")
+    }
 }
 
 fun renderDirectoryPage(dir: SourcePath) {

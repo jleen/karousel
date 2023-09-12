@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("org.freemarker:freemarker:2.3.32")
 }
 
 tasks.test {

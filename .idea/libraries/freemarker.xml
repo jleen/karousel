@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="freemarker" type="repository">
+    <properties maven-id="org.freemarker:freemarker:2.3.32" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/freemarker/freemarker/2.3.32/freemarker-2.3.32.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

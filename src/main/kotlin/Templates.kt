@@ -16,7 +16,6 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
         hashMapOf("name" to "next crumb", "dir" to "whatever"),
     )
     val model = hashMapOf(
-        "photo" to photo.fileName,
         "pageTitle" to "Page Title",
         "browsePrefix" to "../../../",
         "galleryTitle" to "Carousel",
@@ -24,9 +23,9 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
         "finalCrumb" to "12",
         "prev" to "11.html",
         "next" to "13.html",
-        "fullPhotoUrl" to "12.png",
-        "framedPhotoUrl" to "tiny12.png",
-        "caption" to "Amazing Art"
-        )
+        "fullPhotoUrl" to photo.fileName,
+        "framedPhotoUrl" to photo.withSuffix(Size.VIEW.suffix).fileName,
+        "caption" to "Amazing Art",
+    )
     template.process(model, page.path.writer())
 }

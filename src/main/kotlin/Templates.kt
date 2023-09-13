@@ -34,8 +34,26 @@ fun templateIndexPage(page: TargetPath, dir: TargetPath) {
     // TODO: For now we'll re-enumerate the directory.
     //   At some point we might want to optimize by reusing the earlier traversal.
     val template = freemarkerConfig.getTemplate("IndexPage.ftl")
+    val breadcrumbs = listOf(
+        hashMapOf("name" to "top crumb", "dir" to "whatever"),
+        hashMapOf("name" to "next crumb", "dir" to "whatever"),
+    )
+    val subdirs = listOf(
+        hashMapOf("dir" to "", "name" to "", "preview" to "", "height" to 0, "width" to 0),
+    )
+    val images = listOf(
+        hashMapOf(
+            "medurl" to "", "thumburl" to "", "bigurl" to "",
+            "caption" to "", "height" to 0, "width" to 0),
+    )
     val model = hashMapOf(
         "galleryTitle" to "Carousel",
+        "browsePrefix" to "../../../",
+        "thisdir" to "",
+        "breadcrumbs" to breadcrumbs,
+        "finalCrumb" to "",
+        "subdirs" to subdirs,
+        "imgurls" to images,
     )
     template.process(model, page.path.writer())
 }

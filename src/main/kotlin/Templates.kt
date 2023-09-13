@@ -29,3 +29,13 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
     )
     template.process(model, page.path.writer())
 }
+
+fun templateIndexPage(page: TargetPath, dir: TargetPath) {
+    // TODO: For now we'll re-enumerate the directory.
+    //   At some point we might want to optimize by reusing the earlier traversal.
+    val template = freemarkerConfig.getTemplate("IndexPage.ftl")
+    val model = hashMapOf(
+        "galleryTitle" to "Carousel",
+    )
+    template.process(model, page.path.writer())
+}

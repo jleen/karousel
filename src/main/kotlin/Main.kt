@@ -59,8 +59,13 @@ fun renderPhotoPage(photo: SourcePath) {
 }
 
 fun renderDirectoryPage(dir: SourcePath) {
-    val index = dir.toTarget().resolve("index.html")
-    println("* $index")
+    val index = TargetPath(dir.toTarget().resolve("index.html"))
+    if (true) { //isStale(photo, target)) {
+        templateIndexPage(index, dir.toTarget())
+        println("* $index")
+    } else {
+        println("  $index")
+    }
 }
 
 fun isStale(source: SourcePath, target: TargetPath): Boolean =

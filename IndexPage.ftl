@@ -49,8 +49,8 @@
     <div class="image_entry">
         <div>
             <div class="image_inner">
-                <a href="${imgurl.medurl}"><img src="${imgurl.thumburl}" border="2" class="thumbnail" height="${imgurl.height}" width="${imgurl.width}" /></a>
-                <div class="caption"><a href="${imgurl.bigurl}">${imgurl.caption}</a></div>
+                <a href="${imgurl.pageurl}"><img src="${imgurl.thumburl}" border="2" class="thumbnail" height="${imgurl.height}" width="${imgurl.width}" /></a>
+                <div class="caption"><a href="${imgurl.pageurl}">${imgurl.caption}</a></div>
             </div>
         </div>
     </div>

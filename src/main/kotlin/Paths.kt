@@ -23,3 +23,9 @@ class TargetPath(val path: Path) : Path by path {
         return TargetPath(Path(nameWithSuffix))
     }
 }
+
+class PhotoInfo(val targetPath: TargetPath) {
+    fun fileName() = targetPath.fileName
+
+
+}

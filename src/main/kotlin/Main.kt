@@ -6,7 +6,7 @@ import javax.imageio.ImageIO
 import kotlin.io.path.*
 
 enum class Size(val width: Int, val height: Int, val suffix: String) {
-    VIEW(500, 700, "small"),
+    VIEW(700, 500, "small"),
     THUMBNAIL(200, 200, "thumbnail"),
     DIRECTORY(100, 100, "dirthumb"),
 }
@@ -24,8 +24,8 @@ fun main(args: Array<String>) {
 
 fun traverseDirectory(dir: SourcePath) {
     createTargetDirectory(dir)
-    renderDirectoryPage(dir)
 
+    // Depth first, to create the previews and cache the photo dimensions.
     val files = dir.path.listDirectoryEntries()
     files.forEach {
         when {
@@ -33,15 +33,19 @@ fun traverseDirectory(dir: SourcePath) {
             it.extension == "jpeg" -> traversePhoto(SourcePath(it))
         }
     }
+
+    renderDirectoryPage(dir)
 }
 
 fun createTargetDirectory(dir: SourcePath) = dir.toTarget().path.createDirectories()
 
 fun traversePhoto(photo: SourcePath) {
-    renderPhotoPage(photo)
     renderPreview(photo)
     renderView(photo)
     renderFull(photo)
+
+    // Do the page last, so that the images have been created and their dimensions are known.
+    renderPhotoPage(photo)
 }
 
 fun renderFull(photo: SourcePath) = copyPhoto(photo)

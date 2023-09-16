@@ -40,7 +40,7 @@
                 </div>
             </div>
 
-            <a href="${fullPhotoUrl}"><img class="itself" src="${framedPhotoUrl}" border="2" vspace="10" align="middle"></a>
+            <a href="${fullPhotoUrl}"><img class="itself" src="${framedPhotoUrl}" height="${height}" width="${width}" border="2" vspace="10" align="middle"></a>
             <div class="phototitle"><b>${caption}</b></div><br>
         </div>
     </div>

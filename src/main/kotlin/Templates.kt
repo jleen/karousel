@@ -1,5 +1,6 @@
 import freemarker.template.Configuration
 import java.io.File
+import javax.imageio.ImageIO
 import kotlin.io.path.writer
 
 val freemarkerConfig by lazy {
@@ -9,8 +10,22 @@ val freemarkerConfig by lazy {
     config
 }
 
+object PhotoInfoCache {
+    private val photoInfo: MutableMap<TargetPath, Pair<Int, Int>> = mutableMapOf()
+    fun get(path: TargetPath): Pair<Int, Int> {
+        return photoInfo.getOrPut(path) {
+            val image = ImageIO.read(path.path.toFile())
+            Pair(image.width, image.height)
+        }
+    }
+
+    fun put(path: TargetPath, dims: Pair<Int, Int>) = photoInfo.put(path, dims)
+}
+
 fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
+    val viewPath = photo.withSuffix(Size.VIEW.suffix)
+    val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
     val breadcrumbs = listOf(
         hashMapOf("name" to "top crumb", "dir" to "whatever"),
         hashMapOf("name" to "next crumb", "dir" to "whatever"),
@@ -24,8 +39,10 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
         "prev" to "11.html",
         "next" to "13.html",
         "fullPhotoUrl" to photo.fileName,
-        "framedPhotoUrl" to photo.withSuffix(Size.VIEW.suffix).fileName,
+        "framedPhotoUrl" to viewPath.fileName,
         "caption" to "Amazing Art",
+        "height" to height,
+        "width" to width,
     )
     template.process(model, page.path.writer())
 }
@@ -43,7 +60,7 @@ fun templateIndexPage(page: TargetPath, dir: TargetPath) {
     )
     val images = listOf(
         hashMapOf(
-            "medurl" to "", "thumburl" to "", "bigurl" to "",
+            "pageurl" to "", "thumburl" to "",
             "caption" to "", "height" to 0, "width" to 0),
     )
     val model = hashMapOf(

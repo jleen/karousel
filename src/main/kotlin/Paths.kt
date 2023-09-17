@@ -26,14 +26,17 @@ class TargetPath(val path: Path) : Path by path {
 
     fun toTitle(): String {
         val name = path.nameWithoutExtension
-        return when {
-            isSerial(name) -> name.substringAfterLast("_").toInt().toString()
-            isBoring(name) -> ""
-            else -> name.replace("_", " ")
-        }
+        return toTitle(name)
     }
 
-    private fun isSerial(name: String): Boolean = name.matches(Regex("""\p{Alpha}+_20\d\d_\w*_\d*"""))
-    private fun isBoring(name: String): Boolean = true
     fun toCaption(): String = if (isSerial(path.nameWithoutExtension)) "" else toTitle()
 }
+
+fun toTitle(name: String) = when {
+    isSerial(name) -> name.substringAfterLast("_").toInt().toString()
+    isBoring(name) -> ""
+    else -> name.replace("_", " ")
+}
+
+fun isSerial(name: String): Boolean = name.matches(Regex("""\p{Alpha}+_20\d\d_\w*_\d*"""))
+fun isBoring(name: String): Boolean = name.matches(Regex("""\d*"""))

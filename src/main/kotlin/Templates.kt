@@ -1,9 +1,7 @@
 import freemarker.template.Configuration
 import java.io.File
 import javax.imageio.ImageIO
-import kotlin.io.path.Path
-import kotlin.io.path.name
-import kotlin.io.path.writer
+import kotlin.io.path.*
 
 val freemarkerConfig by lazy {
     val config = Configuration(Configuration.VERSION_2_3_32)
@@ -79,7 +77,7 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, ne
     val numCrumbs = breadcrumbPath.toList().lastIndex
     val breadcrumbs = breadcrumbPath.mapIndexed { i, comp ->
         val dots = if (i < numCrumbs) "../".repeat(numCrumbs - i) else "."
-        BreadcrumbModel(comp.name, dots)
+        BreadcrumbModel(toTitle(comp.name), dots)
     }
     val model = PhotoPageModel(
         pageTitle = page.toTitle(),
@@ -98,26 +96,38 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, ne
     template.process(model, page.path.writer())
 }
 
-fun templateIndexPage(page: TargetPath, dir: TargetPath) {
+fun templateIndexPage(page: TargetPath, dir: SourcePath) {
     // TODO: For now we'll re-enumerate the directory.
     //   At some point we might want to optimize by reusing the earlier traversal.
     val template = freemarkerConfig.getTemplate("IndexPage.ftl")
-    val breadcrumbs = listOf(
-        BreadcrumbModel("top crumb", "whatever"),
-        BreadcrumbModel("next crumb", "whatever"),
-    )
-    val subDirs = listOf(
-        SubDirModel("", "", "", 0, 0)
-    )
-    val images = listOf(
-        ImageModel("", "", "", 0, 0)
-    )
+    val breadcrumbPath = targetRoot.relativize(page.parent)
+    val numCrumbs = breadcrumbPath.toList().lastIndex
+    val breadcrumbs = breadcrumbPath.mapIndexed { i, comp ->
+        val dots = if (i < numCrumbs) "../".repeat(numCrumbs - i) else "."
+        BreadcrumbModel(toTitle(comp.name), dots)
+    }
+    val subDirs = dir.path.listDirectoryEntries().filter { it.isDirectory() }.sorted().map {
+        SubDirModel(dir = it.name, name = it.toString(), preview = "", height = 0, width = 0)
+    }
+    val images = dir.path.listDirectoryEntries()
+        .filter { !it.isDirectory() && !it.name.startsWith(".") }.sorted()
+        .map {
+            val thumbnail = SourcePath(it).toTarget().withSuffix(Size.THUMBNAIL.suffix)
+            val (width, height) = PhotoInfoCache.get(thumbnail)
+            ImageModel(
+                pageUrl = SourcePath(it).toPhotoPagePath().name,
+                thumbUrl = thumbnail.name,
+                caption = TargetPath(it).toCaption(),
+                height = height,
+                width = width
+            )
+    }
     val model = IndexPageModel(
         galleryTitle = "Carousel",
-        browsePrefix = "../../../",
-        thisDir = "",
+        browsePrefix = page.parent.relativize(targetRoot).toString(),
+        thisDir = page.toTitle(),
         breadcrumbs = breadcrumbs,
-        finalCrumb = "",
+        finalCrumb = page.toTitle(),
         subDirs = subDirs,
         imgUrls = images,
     )

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,7 +41,7 @@
             </div>
 
             <a href="${fullPhotoUrl}"><img class="itself" src="${framedPhotoUrl}" height="${height}" width="${width}" border="2" vspace="10" align="middle"></a>
-            <div class="phototitle"><b>${caption}</b></div><br>
+            <div class="photoTitle"><b>${caption}</b></div><br>
         </div>
     </div>
 

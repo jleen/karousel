@@ -1,7 +1,6 @@
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.extension
-import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 
 class SourcePath(val path: Path) {
@@ -15,10 +14,6 @@ class SourcePath(val path: Path) {
 }
 
 class TargetPath(val path: Path) : Path by path {
-    fun toSource(): SourcePath {
-        return SourcePath(path)
-    }
-
     override fun toString() = path.toString()
 
     fun withSuffix(suffix: String): TargetPath {

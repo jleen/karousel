@@ -7,7 +7,7 @@ import kotlin.io.path.*
 enum class Size(val width: Int, val height: Int, val suffix: String) {
     VIEW(700, 500, "small"),
     THUMBNAIL(200, 200, "thumbnail"),
-    DIRECTORY(100, 100, "dirthumb"),
+    DIRECTORY(100, 100, "dir_thumbnail"),
 }
 
 // TODO: This can't be the right way to do this.
@@ -73,10 +73,10 @@ fun renderDirectoryPage(dir: SourcePath) {
 
 fun isStale(source: SourcePath, target: TargetPath): Boolean {
     // Temporary dev hack to always regenerate HTML files.
-    if (target.path.extension == "html") return true;
+    if (target.path.extension == "html") return true
 
     val sourceLastModifiedTime = if (source.path.isDirectory())
-        source.path.listDirectoryEntries().map { it.getLastModifiedTime() }.max()
+        source.path.listDirectoryEntries().maxOfOrNull { it.getLastModifiedTime() }
     else
         source.path.getLastModifiedTime()
     return !target.path.exists() || target.path.getLastModifiedTime() < sourceLastModifiedTime
@@ -114,6 +114,11 @@ fun resizePhoto(source: SourcePath, size: Size) {
         graph.dispose()
         ImageIO.write(resized, "jpg", target.path.toFile())
         println("* $target")
+
+        // Remember the dimensions of the original and resized images,
+        // so that we can quickly emit them as part of HTML pages later.
+        PhotoInfoCache.put(source.toTarget(), Pair(original.width, original.height))
+        PhotoInfoCache.put(target, Pair(width, height))
     } else {
         println("  $target")
     }
@@ -124,8 +129,8 @@ private fun Size.computeScaledSize(width: Int, height: Int): Pair<Int, Int> {
     val shrinkHeight = height.toDouble() / this.height
     // Explicitly return at least one target dimension (prioritizing height)
     // to avoid embarrassing floating point off-by-one.
-    if (shrinkHeight >= shrinkWidth)
-        return Pair((width / shrinkWidth).toInt(), this.height)
+    return if (shrinkHeight >= shrinkWidth)
+        Pair((width / shrinkWidth).toInt(), this.height)
     else
-        return Pair(this.width, (height / shrinkWidth).toInt())
+        Pair(this.width, (height / shrinkWidth).toInt())
 }

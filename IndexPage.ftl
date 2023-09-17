@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" href="${browsePrefix}}carousel.css" />
 
     <#if breadcrumbs??>
-    <title>${thisdir} - ${galleryTitle}}</title>
+    <title>${thisDir} - ${galleryTitle}}</title>
     <#else>
     <title>${galleryTitle}</title>
     </#if>
@@ -27,30 +27,30 @@
 </#if>
 
 <div class="directory_section">
-    <#list subdirs as subdir>
+    <#list subDirs as subDir>
     <div class="directory_entry">
         <div class="directory_inner">
             <div class="directory_innerer">
                 <div>
-                    <a href="${subdir.dir}"><img src="${subdir.preview}" border="2" align="middle" height="${subdir.height}" width="${subdir.width}" class="dir_thumb" /></a>
+                    <a href="${subDir.dir}"><img src="${subDir.preview}" border="2" align="middle" height="${subDir.height}" width="${subDir.width}" class="dir_thumb" /></a>
                 </div>
             </div>
         </div>
         <div class="directory_name">
-            <a href="${subdir.dir}">${subdir.name}</a>
+            <a href="${subDir.dir}">${subDir.name}</a>
         </div>
     </div>
     </#list>
 </div>
 
-<#if imgurls??>
+<#if imgUrls??>
 <div class="image_section">
-    <#list imgurls as imgurl>
+    <#list imgUrls as imgUrl>
     <div class="image_entry">
         <div>
             <div class="image_inner">
-                <a href="${imgurl.pageurl}"><img src="${imgurl.thumburl}" border="2" class="thumbnail" height="${imgurl.height}" width="${imgurl.width}" /></a>
-                <div class="caption"><a href="${imgurl.pageurl}">${imgurl.caption}</a></div>
+                <a href="${imgUrl.pageUrl}"><img src="${imgUrl.thumbUrl}" border="2" class="thumbnail" height="${imgUrl.height}" width="${imgUrl.width}" /></a>
+                <div class="caption"><a href="${imgUrl.pageUrl}">${imgUrl.caption}</a></div>
             </div>
         </div>
     </div>

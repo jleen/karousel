@@ -56,22 +56,22 @@ fun templateIndexPage(page: TargetPath, dir: TargetPath) {
         hashMapOf("name" to "top crumb", "dir" to "whatever"),
         hashMapOf("name" to "next crumb", "dir" to "whatever"),
     )
-    val subdirs = listOf(
+    val subDirs = listOf(
         hashMapOf("dir" to "", "name" to "", "preview" to "", "height" to 0, "width" to 0),
     )
     val images = listOf(
         hashMapOf(
-            "pageurl" to "", "thumburl" to "",
+            "pageUrl" to "", "thumbUrl" to "",
             "caption" to "", "height" to 0, "width" to 0),
     )
     val model = hashMapOf(
         "galleryTitle" to "Carousel",
         "browsePrefix" to "../../../",
-        "thisdir" to "",
+        "thisDir" to "",
         "breadcrumbs" to breadcrumbs,
         "finalCrumb" to "",
-        "subdirs" to subdirs,
-        "imgurls" to images,
+        "subDirs" to subDirs,
+        "imgUrls" to images,
     )
     template.process(model, page.path.writer())
 }

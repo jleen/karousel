@@ -1,5 +1,4 @@
-import java.awt.RenderingHints.KEY_INTERPOLATION
-import java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
+import java.awt.Image
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 import kotlin.io.path.*
@@ -116,8 +115,7 @@ fun resizePhoto(source: SourcePath, size: Size) {
         val (width, height) = size.computeScaledSize(original.width, original.height)
         val resized = BufferedImage(width, height, original.type)
         val graph = resized.createGraphics()
-        graph.setRenderingHint(KEY_INTERPOLATION, VALUE_INTERPOLATION_BILINEAR)
-        graph.drawImage(original,0, 0, width, height, null)
+        graph.drawImage(original.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null)
         graph.dispose()
         ImageIO.write(resized, "jpg", target.path.toFile())
         println("* $target")

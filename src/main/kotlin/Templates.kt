@@ -35,8 +35,8 @@ class PhotoPageModel(
     val galleryTitle: String,
     val breadcrumbs: List<BreadcrumbModel>,
     val finalCrumb: String,
-    val prev: String,
-    val next: String,
+    val prev: String?,
+    val next: String?,
     val fullPhotoUrl: String,
     val framedPhotoUrl: String,
     val caption: String,
@@ -70,7 +70,7 @@ class ImageModel(
     val width: Number,
 )
 
-fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
+fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, next: TargetPath?) {
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
     val viewPath = photo.withSuffix(Size.VIEW.suffix)
     val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
@@ -84,8 +84,8 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
         galleryTitle = "Carousel",
         breadcrumbs = breadcrumbs,
         finalCrumb = page.toTitle(),
-        prev = "prev.html",
-        next = "next.html",
+        prev = prev?.let { page.parent.relativize(it.path).toString() },
+        next = next?.let { page.parent.relativize(it.path).toString() },
         fullPhotoUrl = photo.fileName.name,
         framedPhotoUrl = viewPath.fileName.name,
         caption = page.toCaption(),

@@ -10,6 +10,9 @@ class SourcePath(val path: Path) {
         return TargetPath(target)
     }
 
+    fun toPhotoPagePath(): TargetPath =
+        TargetPath(Path(toTarget().toString().substringBeforeLast(".") + ".html"))
+
     override fun toString() = path.toString()
 }
 

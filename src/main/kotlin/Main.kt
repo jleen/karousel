@@ -25,11 +25,18 @@ fun traverseDirectory(dir: SourcePath) {
     createTargetDirectory(dir)
 
     // Depth first, to create the previews and cache the photo dimensions.
-    val files = dir.path.listDirectoryEntries()
-    files.forEach {
+    val files = dir.path.listDirectoryEntries().sorted()
+    files.forEachIndexed { index, file ->
         when {
-            it.isDirectory() -> traverseDirectory(SourcePath(it))
-            it.extension == "jpeg" -> traversePhoto(SourcePath(it))
+            file.isDirectory() -> {
+                traverseDirectory(SourcePath(file))
+            }
+            file.extension == "jpeg" -> {
+                traversePhoto(
+                    SourcePath(file),
+                    prev = if (index > 0) SourcePath(files[index - 1]) else null,
+                    next = if (index < files.lastIndex) SourcePath(files[index + 1]) else null)
+            }
         }
     }
 
@@ -38,23 +45,23 @@ fun traverseDirectory(dir: SourcePath) {
 
 fun createTargetDirectory(dir: SourcePath) = dir.toTarget().path.createDirectories()
 
-fun traversePhoto(photo: SourcePath) {
+fun traversePhoto(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
     renderPreview(photo)
     renderView(photo)
     renderFull(photo)
 
     // Do the page last, so that the images have been created and their dimensions are known.
-    renderPhotoPage(photo)
+    renderPhotoPage(photo, prev, next)
 }
 
 fun renderFull(photo: SourcePath) = copyPhoto(photo)
 fun renderPreview(photo: SourcePath) = resizePhoto(photo, Size.THUMBNAIL)
 fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
-fun renderPhotoPage(photo: SourcePath) {
-    val target = TargetPath(Path(photo.toTarget().toString().substringBeforeLast(".") + ".html"))
+fun renderPhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
+    val target = photo.toPhotoPagePath()
     if (isStale(photo, target)) {
-        templatePhotoPage(target, photo.toTarget())
+        templatePhotoPage(target, photo.toTarget(), prev?.toPhotoPagePath(), next?.toPhotoPagePath())
         println("* $target")
     } else {
         println("  $target")

@@ -5,8 +5,8 @@ import kotlin.io.path.nameWithoutExtension
 
 class SourcePath(val path: Path) {
     fun toTarget(): TargetPath {
-        val relative = Path(sourceRoot).relativize(path)
-        val target = Path(targetRoot).resolve(relative)
+        val relative = sourceRoot.relativize(path)
+        val target = targetRoot.resolve(relative)
         return TargetPath(target)
     }
 

@@ -11,12 +11,12 @@ enum class Size(val width: Int, val height: Int, val suffix: String) {
 }
 
 // TODO: This can't be the right way to do this.
-var sourceRoot: String = ""
-var targetRoot: String = ""
+var sourceRoot = Path("")
+var targetRoot = Path("")
 
 fun main(args: Array<String>) {
-    sourceRoot = args[0]
-    targetRoot = args[1]
+    sourceRoot = Path(args[0])
+    targetRoot = Path(args[1])
     copyCss()
     traverseDirectory(SourcePath(Path(args[0])))
 }
@@ -91,7 +91,7 @@ fun isStale(source: SourcePath, target: TargetPath): Boolean {
 
 fun copyCss() {
     val source = SourcePath(Path("carousel.css"))
-    val target = TargetPath(Path(targetRoot).resolve("carousel.css"))
+    val target = TargetPath(targetRoot.resolve("carousel.css"))
     conditionallyCopy(source, target)
 }
 

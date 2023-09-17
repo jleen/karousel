@@ -71,16 +71,19 @@ class ImageModel(
 )
 
 fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, next: TargetPath?) {
+    // TODO: All of the path handling needs to convert target paths to URLs.
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
     val viewPath = photo.withSuffix(Size.VIEW.suffix)
     val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
-    val breadcrumbs = listOf(
-        BreadcrumbModel("top crumb", "whatever"),
-        BreadcrumbModel("top crumb", "whatever"),
-    )
+    val breadcrumbPath = targetRoot.relativize(page.parent)
+    val numCrumbs = breadcrumbPath.toList().lastIndex
+    val breadcrumbs = breadcrumbPath.mapIndexed { i, comp ->
+        val dots = if (i < numCrumbs) "../".repeat(numCrumbs - i) else "."
+        BreadcrumbModel(comp.name, dots)
+    }
     val model = PhotoPageModel(
         pageTitle = page.toTitle(),
-        browsePrefix = page.parent.relativize(Path(targetRoot)).toString(),
+        browsePrefix = page.parent.relativize(targetRoot).toString(),
         galleryTitle = "Carousel",
         breadcrumbs = breadcrumbs,
         finalCrumb = page.toTitle(),

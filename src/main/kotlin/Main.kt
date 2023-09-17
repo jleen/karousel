@@ -1,5 +1,8 @@
 import com.twelvemonkeys.image.ResampleOp
+import javax.imageio.IIOImage
 import javax.imageio.ImageIO
+import javax.imageio.ImageWriteParam
+import javax.imageio.stream.FileImageOutputStream
 import kotlin.io.path.*
 
 enum class Size(val width: Int, val height: Int, val suffix: String) {
@@ -114,7 +117,13 @@ fun resizePhoto(source: SourcePath, size: Size) {
         val (width, height) = size.computeScaledSize(original.width, original.height)
         val lanczos = ResampleOp(width, height, ResampleOp.FILTER_LANCZOS)
         val resized = lanczos.filter(original, null)
-        ImageIO.write(resized, "jpg", target.path.toFile())
+        val jpegWriter = ImageIO.getImageWritersByFormatName("jpg").next()  // Bogus!!
+        val writeParam = jpegWriter.defaultWriteParam
+        writeParam.compressionMode = ImageWriteParam.MODE_EXPLICIT
+        writeParam.compressionQuality = 0.95f
+        jpegWriter.output = FileImageOutputStream(target.path.toFile())
+        jpegWriter.write(null, IIOImage(resized, null, null), writeParam)
+        jpegWriter.dispose()
         println("* $target")
 
         // Remember the dimensions of the original and resized images,

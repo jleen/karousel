@@ -1,12 +1,11 @@
 import freemarker.template.Configuration
-import java.io.File
 import javax.imageio.ImageIO
 import kotlin.io.path.*
 
 val freemarkerConfig by lazy {
     val config = Configuration(Configuration.VERSION_2_3_32)
     config.defaultEncoding = "UTF-8"
-    config.setDirectoryForTemplateLoading(File("."))
+    config.setClassForTemplateLoading(TargetPath::class.java, "templates")
     config
 }
 

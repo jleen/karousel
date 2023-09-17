@@ -1,6 +1,7 @@
 import freemarker.template.Configuration
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.io.path.Path
 import kotlin.io.path.writer
 
 val freemarkerConfig by lazy {
@@ -31,16 +32,16 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
         hashMapOf("name" to "next crumb", "dir" to "whatever"),
     )
     val model = hashMapOf(
-        "pageTitle" to "Page Title",
-        "browsePrefix" to "../../../",
-        "galleryTitle" to "Carousel",
+        "pageTitle" to page.toTitle(),  // TODO: May want to make this slightly fancier.
+        "browsePrefix" to page.parent.relativize(Path(targetRoot)),
+        "galleryTitle" to "Carousel",  // TODO
         "breadcrumbs" to breadcrumbs,
-        "finalCrumb" to "12",
-        "prev" to "11.html",
-        "next" to "13.html",
+        "finalCrumb" to page.toTitle(),
+        "prev" to "prev.html",  // TODO
+        "next" to "next.html",  // TODO
         "fullPhotoUrl" to photo.fileName,
         "framedPhotoUrl" to viewPath.fileName,
-        "caption" to "Amazing Art",
+        "caption" to page.toCaption(),
         "height" to height,
         "width" to width,
     )

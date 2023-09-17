@@ -137,7 +137,7 @@ private fun Size.computeScaledSize(width: Int, height: Int): Pair<Int, Int> {
     // Explicitly return at least one target dimension (prioritizing height)
     // to avoid embarrassing floating point off-by-one.
     return if (shrinkHeight >= shrinkWidth)
-        Pair((width / shrinkWidth).toInt(), this.height)
+        Pair((width / shrinkHeight).toInt(), this.height)
     else
         Pair(this.width, (height / shrinkWidth).toInt())
 }

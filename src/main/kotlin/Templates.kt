@@ -68,21 +68,24 @@ class ImageModel(
     val width: Number,
 )
 
+private const val SITE_NAME = "Carousel"
+
 fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, next: TargetPath?) {
     // TODO: All of the path handling needs to convert target paths to URLs.
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
     val viewPath = photo.withSuffix(Size.VIEW.suffix)
     val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
     val breadcrumbPath = targetRoot.relativize(page.parent)
-    val numCrumbs = breadcrumbPath.toList().lastIndex
-    val breadcrumbs = breadcrumbPath.mapIndexed { i, comp ->
+    val crumbComponents = listOf(SITE_NAME) + breadcrumbPath.map { it.name }
+    val numCrumbs = crumbComponents.lastIndex
+    val breadcrumbs = crumbComponents.mapIndexed { i, comp ->
         val dots = if (i < numCrumbs) "../".repeat(numCrumbs - i) else "."
-        BreadcrumbModel(toTitle(comp.name), dots)
+        BreadcrumbModel(toTitle(comp), dots)
     }
     val model = PhotoPageModel(
         pageTitle = page.toTitle(),
         browsePrefix = page.parent.relativize(targetRoot).toString(),
-        galleryTitle = "Carousel",
+        galleryTitle = SITE_NAME,
         breadcrumbs = breadcrumbs,
         finalCrumb = page.toTitle(),
         prev = prev?.let { page.parent.relativize(it.path).toString() },
@@ -100,14 +103,15 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
     // TODO: For now we'll re-enumerate the directory.
     //   At some point we might want to optimize by reusing the earlier traversal.
     val template = freemarkerConfig.getTemplate("IndexPage.ftl")
-    val breadcrumbPath = targetRoot.relativize(page.parent)
-    val numCrumbs = breadcrumbPath.toList().lastIndex
-    val breadcrumbs = breadcrumbPath.mapIndexed { i, comp ->
-        val dots = if (i < numCrumbs) "../".repeat(numCrumbs - i) else "."
-        BreadcrumbModel(toTitle(comp.name), dots)
+    val breadcrumbPath = targetRoot.relativize(page.parent.parent)
+    val crumbComponents = listOf(SITE_NAME) + breadcrumbPath.map { it.name }
+    val numCrumbs = crumbComponents.size
+    val breadcrumbs = crumbComponents.mapIndexed { i, comp ->
+        val dots = "../".repeat(numCrumbs - i)
+        BreadcrumbModel(toTitle(comp), dots)
     }
     val subDirs = dir.path.listDirectoryEntries().filter { it.isDirectory() }.sorted().map {
-        SubDirModel(dir = it.name, name = it.toString(), preview = "", height = 0, width = 0)
+        SubDirModel(dir = it.name, name = TargetPath(it).toCaption(), preview = "", height = 0, width = 0)
     }
     val images = dir.path.listDirectoryEntries()
         .filter { !it.isDirectory() && !it.name.startsWith(".") }.sorted()
@@ -123,11 +127,11 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
             )
     }
     val model = IndexPageModel(
-        galleryTitle = "Carousel",
+        galleryTitle = SITE_NAME,
         browsePrefix = page.parent.relativize(targetRoot).toString(),
         thisDir = page.toTitle(),
         breadcrumbs = breadcrumbs,
-        finalCrumb = page.toTitle(),
+        finalCrumb = TargetPath(page.parent).toTitle(),
         subDirs = subDirs,
         imgUrls = images,
     )

@@ -35,8 +35,11 @@ class TargetPath(val path: Path) : Path by path {
 fun toTitle(name: String) = when {
     isSerial(name) -> name.substringAfterLast("_").toInt().toString()
     isBoring(name) -> ""
-    else -> name.replace("_", " ")
+    else -> name.replace("_", " ").replace(Regex("""^\d\d """), "")
 }
 
 fun isSerial(name: String): Boolean = name.matches(Regex("""\p{Alpha}+_20\d\d_\w*_\d*"""))
-fun isBoring(name: String): Boolean = name.matches(Regex("""\d*"""))
+fun isBoring(name: String): Boolean {
+    if (name.matches(Regex("""\d{4}"""))) return false;  // Years are *not* boring.
+    return name.matches(Regex("""\d*"""))
+}

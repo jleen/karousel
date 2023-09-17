@@ -25,7 +25,7 @@ fun traverseDirectory(dir: SourcePath) {
     createTargetDirectory(dir)
 
     // Depth first, to create the previews and cache the photo dimensions.
-    val files = dir.path.listDirectoryEntries().sorted()
+    val files = dir.path.listDirectoryEntries().sorted().filter { !it.name.startsWith(".") || it.isDirectory() }
     files.forEachIndexed { index, file ->
         when {
             file.isDirectory() -> {

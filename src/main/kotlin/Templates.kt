@@ -42,32 +42,7 @@ class PhotoPageModel(
     val caption: String,
     val height: String,
     val width: String,
-);
-
-fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
-    val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
-    val viewPath = photo.withSuffix(Size.VIEW.suffix)
-    val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
-    val breadcrumbs = listOf(
-        BreadcrumbModel("top crumb", "whatever"),
-        BreadcrumbModel("top crumb", "whatever"),
-    )
-    val model = PhotoPageModel(
-        pageTitle = page.toTitle(),
-        browsePrefix = page.parent.relativize(Path(targetRoot)).toString(),
-        galleryTitle = "Carousel",
-        breadcrumbs = breadcrumbs,
-        finalCrumb = page.toTitle(),
-        prev = "prev.html",
-        next = "next.html",
-        fullPhotoUrl = photo.fileName.name,
-        framedPhotoUrl = viewPath.fileName.name,
-        caption = page.toCaption(),
-        height = height.toString(),
-        width = width.toString()
-    )
-    template.process(model, page.path.writer())
-}
+)
 
 class IndexPageModel(
     val galleryTitle: String,
@@ -94,6 +69,31 @@ class ImageModel(
     val height: Number,
     val width: Number,
 )
+
+fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
+    val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
+    val viewPath = photo.withSuffix(Size.VIEW.suffix)
+    val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
+    val breadcrumbs = listOf(
+        BreadcrumbModel("top crumb", "whatever"),
+        BreadcrumbModel("top crumb", "whatever"),
+    )
+    val model = PhotoPageModel(
+        pageTitle = page.toTitle(),
+        browsePrefix = page.parent.relativize(Path(targetRoot)).toString(),
+        galleryTitle = "Carousel",
+        breadcrumbs = breadcrumbs,
+        finalCrumb = page.toTitle(),
+        prev = "prev.html",
+        next = "next.html",
+        fullPhotoUrl = photo.fileName.name,
+        framedPhotoUrl = viewPath.fileName.name,
+        caption = page.toCaption(),
+        height = height.toString(),
+        width = width.toString()
+    )
+    template.process(model, page.path.writer())
+}
 
 fun templateIndexPage(page: TargetPath, dir: TargetPath) {
     // TODO: For now we'll re-enumerate the directory.

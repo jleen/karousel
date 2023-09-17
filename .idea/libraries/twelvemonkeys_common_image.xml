@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="twelvemonkeys.common.image" type="repository">
+    <properties maven-id="com.twelvemonkeys.common:common-image:3.9.4" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/twelvemonkeys/common/common-image/3.9.4/common-image-3.9.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/twelvemonkeys/common/common-lang/3.9.4/common-lang-3.9.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/twelvemonkeys/common/common-io/3.9.4/common-io-3.9.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -13,6 +13,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation("org.freemarker:freemarker:2.3.32")
+    implementation("com.twelvemonkeys.common:common-image:3.9.4")
 }
 
 tasks.test {

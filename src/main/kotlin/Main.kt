@@ -1,5 +1,4 @@
-import java.awt.Image
-import java.awt.image.BufferedImage
+import com.twelvemonkeys.image.ResampleOp
 import javax.imageio.ImageIO
 import kotlin.io.path.*
 
@@ -113,10 +112,8 @@ fun resizePhoto(source: SourcePath, size: Size) {
     if (isStale(source, target)) {
         val original = ImageIO.read(source.path.toFile())
         val (width, height) = size.computeScaledSize(original.width, original.height)
-        val resized = BufferedImage(width, height, original.type)
-        val graph = resized.createGraphics()
-        graph.drawImage(original.getScaledInstance(width, height, Image.SCALE_SMOOTH), 0, 0, null)
-        graph.dispose()
+        val lanczos = ResampleOp(width, height, ResampleOp.FILTER_LANCZOS)
+        val resized = lanczos.filter(original, null)
         ImageIO.write(resized, "jpg", target.path.toFile())
         println("* $target")
 

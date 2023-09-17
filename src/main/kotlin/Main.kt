@@ -1,7 +1,6 @@
 import java.awt.RenderingHints.KEY_INTERPOLATION
 import java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR
 import java.awt.image.BufferedImage
-import java.nio.file.Paths
 import javax.imageio.ImageIO
 import kotlin.io.path.*
 
@@ -54,7 +53,7 @@ fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
 fun renderPhotoPage(photo: SourcePath) {
     val target = TargetPath(Path(photo.toTarget().toString().substringBeforeLast(".") + ".html"))
-    if (true) { //isStale(photo, target)) {
+    if (isStale(photo, target)) {
         templatePhotoPage(target, photo.toTarget())
         println("* $target")
     } else {
@@ -64,7 +63,7 @@ fun renderPhotoPage(photo: SourcePath) {
 
 fun renderDirectoryPage(dir: SourcePath) {
     val index = TargetPath(dir.toTarget().resolve("index.html"))
-    if (true) { //isStale(photo, target)) {
+    if (isStale(dir, index)) {
         templateIndexPage(index, dir.toTarget())
         println("* $index")
     } else {
@@ -72,8 +71,16 @@ fun renderDirectoryPage(dir: SourcePath) {
     }
 }
 
-fun isStale(source: SourcePath, target: TargetPath): Boolean =
-    !target.path.exists() || target.path.getLastModifiedTime() < source.path.getLastModifiedTime()
+fun isStale(source: SourcePath, target: TargetPath): Boolean {
+    // Temporary dev hack to always regenerate HTML files.
+    if (target.path.extension == "html") return true;
+
+    val sourceLastModifiedTime = if (source.path.isDirectory())
+        source.path.listDirectoryEntries().map { it.getLastModifiedTime() }.max()
+    else
+        source.path.getLastModifiedTime()
+    return !target.path.exists() || target.path.getLastModifiedTime() < sourceLastModifiedTime
+}
 
 fun copyCss() {
     val source = SourcePath(Path("carousel.css"))

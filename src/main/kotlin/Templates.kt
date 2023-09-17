@@ -2,6 +2,7 @@ import freemarker.template.Configuration
 import java.io.File
 import javax.imageio.ImageIO
 import kotlin.io.path.Path
+import kotlin.io.path.name
 import kotlin.io.path.writer
 
 val freemarkerConfig by lazy {
@@ -23,55 +24,99 @@ object PhotoInfoCache {
     fun put(path: TargetPath, dims: Pair<Int, Int>) = photoInfo.put(path, dims)
 }
 
+class BreadcrumbModel(
+    val name: String,
+    val dir: String,
+)
+
+class PhotoPageModel(
+    val pageTitle: String,
+    val browsePrefix: String,
+    val galleryTitle: String,
+    val breadcrumbs: List<BreadcrumbModel>,
+    val finalCrumb: String,
+    val prev: String,
+    val next: String,
+    val fullPhotoUrl: String,
+    val framedPhotoUrl: String,
+    val caption: String,
+    val height: String,
+    val width: String,
+);
+
 fun templatePhotoPage(page: TargetPath, photo: TargetPath) {
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
     val viewPath = photo.withSuffix(Size.VIEW.suffix)
     val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
     val breadcrumbs = listOf(
-        hashMapOf("name" to "top crumb", "dir" to "whatever"),
-        hashMapOf("name" to "next crumb", "dir" to "whatever"),
+        BreadcrumbModel("top crumb", "whatever"),
+        BreadcrumbModel("top crumb", "whatever"),
     )
-    val model = hashMapOf(
-        "pageTitle" to page.toTitle(),  // TODO: May want to make this slightly fancier.
-        "browsePrefix" to page.parent.relativize(Path(targetRoot)),
-        "galleryTitle" to "Carousel",  // TODO
-        "breadcrumbs" to breadcrumbs,
-        "finalCrumb" to page.toTitle(),
-        "prev" to "prev.html",  // TODO
-        "next" to "next.html",  // TODO
-        "fullPhotoUrl" to photo.fileName,
-        "framedPhotoUrl" to viewPath.fileName,
-        "caption" to page.toCaption(),
-        "height" to height,
-        "width" to width,
+    val model = PhotoPageModel(
+        pageTitle = page.toTitle(),
+        browsePrefix = page.parent.relativize(Path(targetRoot)).toString(),
+        galleryTitle = "Carousel",
+        breadcrumbs = breadcrumbs,
+        finalCrumb = page.toTitle(),
+        prev = "prev.html",
+        next = "next.html",
+        fullPhotoUrl = photo.fileName.name,
+        framedPhotoUrl = viewPath.fileName.name,
+        caption = page.toCaption(),
+        height = height.toString(),
+        width = width.toString()
     )
     template.process(model, page.path.writer())
 }
+
+class IndexPageModel(
+    val galleryTitle: String,
+    val browsePrefix: String,
+    val thisDir: String,
+    val breadcrumbs: List<BreadcrumbModel>,
+    val finalCrumb: String,
+    val subDirs: List<SubDirModel>,
+    val imgUrls: List<ImageModel>,
+)
+
+class SubDirModel(
+    val dir: String,
+    val name: String,
+    val preview: String,
+    val height: Number,
+    val width: Number,
+)
+
+class ImageModel(
+    val pageUrl: String,
+    val thumbUrl: String,
+    val caption: String,
+    val height: Number,
+    val width: Number,
+)
 
 fun templateIndexPage(page: TargetPath, dir: TargetPath) {
     // TODO: For now we'll re-enumerate the directory.
     //   At some point we might want to optimize by reusing the earlier traversal.
     val template = freemarkerConfig.getTemplate("IndexPage.ftl")
     val breadcrumbs = listOf(
-        hashMapOf("name" to "top crumb", "dir" to "whatever"),
-        hashMapOf("name" to "next crumb", "dir" to "whatever"),
+        BreadcrumbModel("top crumb", "whatever"),
+        BreadcrumbModel("next crumb", "whatever"),
     )
     val subDirs = listOf(
-        hashMapOf("dir" to "", "name" to "", "preview" to "", "height" to 0, "width" to 0),
+        SubDirModel("", "", "", 0, 0)
     )
     val images = listOf(
-        hashMapOf(
-            "pageUrl" to "", "thumbUrl" to "",
-            "caption" to "", "height" to 0, "width" to 0),
+        ImageModel("", "", "", 0, 0)
     )
-    val model = hashMapOf(
-        "galleryTitle" to "Carousel",
-        "browsePrefix" to "../../../",
-        "thisDir" to "",
-        "breadcrumbs" to breadcrumbs,
-        "finalCrumb" to "",
-        "subDirs" to subDirs,
-        "imgUrls" to images,
+    val model = IndexPageModel(
+        galleryTitle = "Carousel",
+        browsePrefix = "../../../",
+        thisDir = "",
+        breadcrumbs = breadcrumbs,
+        finalCrumb = "",
+        subDirs = subDirs,
+        imgUrls = images,
     )
     template.process(model, page.path.writer())
 }

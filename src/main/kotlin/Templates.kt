@@ -110,7 +110,10 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
         BreadcrumbModel(toTitle(comp), dots)
     }
     val subDirs = dir.path.listDirectoryEntries().filter { it.isDirectory() }.sorted().map {
-        SubDirModel(dir = it.name, name = TargetPath(it).toCaption(), preview = "", height = 0, width = 0)
+        val dirThumb = SourcePath(it.resolve(".preview.jpeg")).toTarget().withSuffix(Size.DIRECTORY.suffix)
+        val (width, height) = PhotoInfoCache.get(dirThumb)
+        SubDirModel(dir = it.name, name = TargetPath(it).toCaption(),
+            preview = page.path.parent.relativize(dirThumb.path).toString(), height = height, width = width)
     }
     val images = dir.path.listDirectoryEntries()
         .filter { !it.isDirectory() && !it.name.startsWith(".") }.sorted()

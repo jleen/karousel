@@ -26,21 +26,19 @@ fun traverseDirectory(dir: SourcePath) {
     createTargetDirectory(dir)
 
     // Depth first, to create the previews and cache the photo dimensions.
-    val files = dir.path.listDirectoryEntries().sorted().filter { !it.name.startsWith(".") || it.isDirectory() }
-    files.forEachIndexed { index, file ->
-        when {
-            file.isDirectory() -> {
-                traverseDirectory(SourcePath(file))
-            }
-            file.extension == "jpeg" -> {
-                traversePhoto(
-                    SourcePath(file),
-                    prev = if (index > 0) SourcePath(files[index - 1]) else null,
-                    next = if (index < files.lastIndex) SourcePath(files[index + 1]) else null)
-            }
-        }
+    var photos = dir.path.listDirectoryEntries().sorted()
+        .filter { it.extension == "jpeg" && !it.name.startsWith(".") && !it.isDirectory() }
+    photos.forEachIndexed { i, photo -> traversePhoto(
+            SourcePath(photo),
+            prev = if (i > 0) SourcePath(photos[i - 1]) else null,
+            next = if (i < photos.lastIndex) SourcePath(photos[i + 1]) else null)
     }
+    val preview = dir.path.resolve(".preview.jpeg")
+    if (preview.exists()) resizePhoto(SourcePath(preview), Size.DIRECTORY)
+    dir.path.listDirectoryEntries().sorted().filter { it.isDirectory() }.forEach { traverseDirectory(SourcePath(it)) }
 
+    // Now that we have done all the child directories (which includes their previews)
+    // we can proceed to render the parent directory's index.
     renderDirectoryPage(dir)
 }
 

@@ -83,7 +83,7 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, ne
     }
     val model = PhotoPageModel(
         pageTitle = page.toTitle(),
-        browsePrefix = page.parent.relativize(targetRoot).toString(),
+        browsePrefix = page.parent.relativize(targetRoot).toString().replace('\\', '/'),
         galleryTitle = SITE_NAME,
         breadcrumbs = breadcrumbs,
         finalCrumb = page.toTitle(),
@@ -117,7 +117,8 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
         val dirThumb = SourcePath(it.resolve(".preview.jpeg")).toTarget().withSuffix(Size.DIRECTORY.suffix)
         val (width, height) = PhotoInfoCache.get(dirThumb)
         SubDirModel(dir = it.name, name = TargetPath(it).toCaption(),
-            preview = page.path.parent.relativize(dirThumb.path).toString(), height = height, width = width)
+            preview = page.path.parent.relativize(dirThumb.path).toString().replace('\\', '/'),
+            height = height, width = width)
     }
     val images = dir.path.listDirectoryEntries()
         .filter { !it.isDirectory() && !it.name.startsWith(".") }.sorted()
@@ -132,7 +133,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
                 width = width
             )
     }
-    val browsePrefix = page.parent.relativize(targetRoot).toString()
+    val browsePrefix = page.parent.relativize(targetRoot).toString().replace('\\', '/')
     val model = IndexPageModel(
         galleryTitle = SITE_NAME,
         browsePrefix = if (browsePrefix.isNotEmpty()) "$browsePrefix/" else "",

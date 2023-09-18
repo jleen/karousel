@@ -128,9 +128,10 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
                 width = width
             )
     }
+    val browsePrefix = page.parent.relativize(targetRoot).toString()
     val model = IndexPageModel(
         galleryTitle = SITE_NAME,
-        browsePrefix = page.parent.relativize(targetRoot).toString(),
+        browsePrefix = if (browsePrefix.isNotEmpty()) "$browsePrefix/" else "",
         thisDir = page.toTitle(),
         breadcrumbs = breadcrumbs,
         finalCrumb = TargetPath(page.parent).toTitle(),

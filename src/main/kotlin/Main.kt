@@ -26,7 +26,7 @@ fun traverseDirectory(dir: SourcePath) {
     createTargetDirectory(dir)
 
     // Depth first, to create the previews and cache the photo dimensions.
-    var photos = dir.path.listDirectoryEntries().sorted()
+    val photos = dir.path.listDirectoryEntries().sorted()
         .filter { it.extension == "jpeg" && !it.name.startsWith(".") && !it.isDirectory() }
     photos.forEachIndexed { i, photo -> traversePhoto(
             SourcePath(photo),
@@ -89,7 +89,9 @@ fun isStale(source: SourcePath, target: TargetPath): Boolean {
 }
 
 fun copyCss() {
-    val source = SourcePath(Path("carousel.css"))
+    // TODO: Get the data stream directly from the resource, so we work in a JAR.
+    val resource = TargetPath::class.java.getResource("carousel.css")!!
+    val source = SourcePath(resource.toURI().toPath())
     val target = TargetPath(targetRoot.resolve("carousel.css"))
     conditionallyCopy(source, target)
 }
@@ -101,7 +103,7 @@ fun copyPhoto(source: SourcePath) {
 
 fun conditionallyCopy(source: SourcePath, target: TargetPath) {
     if (isStale(source, target)) {
-        source.path.copyTo(target.path)
+        source.path.copyTo(target.path, overwrite = true)
         println("* $target")
     } else {
         println("  $target")

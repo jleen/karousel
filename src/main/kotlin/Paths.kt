@@ -40,6 +40,6 @@ fun toTitle(name: String) = when {
 
 fun isSerial(name: String): Boolean = name.matches(Regex("""\p{Alpha}+_20\d\d_\w*_\d*"""))
 fun isBoring(name: String): Boolean {
-    if (name.matches(Regex("""\d{4}"""))) return false;  // Years are *not* boring.
+    if (name.matches(Regex("""\d{4}"""))) return false  // Years are *not* boring.
     return name.matches(Regex("""\d*"""))
 }

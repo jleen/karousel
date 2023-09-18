@@ -74,24 +74,25 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, ne
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
     val viewPath = photo.withSuffix(Size.VIEW.suffix)
     val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
-    val breadcrumbPath = targetRoot.relativize(page.parent)
+    val breadcrumbPath = targetRoot.relativize(page.parent.parent)
     val crumbComponents = listOf(SITE_NAME) + breadcrumbPath.map { it.name }
-    val numCrumbs = crumbComponents.lastIndex
+    val numCrumbs = crumbComponents.size
     val breadcrumbs = crumbComponents.mapIndexed { i, comp ->
-        val dots = if (i < numCrumbs) "../".repeat(numCrumbs - i) else "."
+        val dots = "../".repeat(numCrumbs - i)
         BreadcrumbModel(toTitle(comp), dots)
     }
+    val dirPath = TargetPath(page.parent)
     val model = PhotoPageModel(
-        pageTitle = page.toTitle(),
+        pageTitle = dirPath.toTitle(),
         browsePrefix = page.parent.relativize(targetRoot).toString().replace('\\', '/'),
         galleryTitle = SITE_NAME,
         breadcrumbs = breadcrumbs,
-        finalCrumb = page.toTitle(),
+        finalCrumb = dirPath.toTitle(),
         prev = prev?.let { page.parent.relativize(it.path).toString() },
         next = next?.let { page.parent.relativize(it.path).toString() },
         fullPhotoUrl = photo.fileName.name,
         framedPhotoUrl = viewPath.fileName.name,
-        caption = page.toCaption(),
+        caption = dirPath.toCaption(),
         height = height.toString(),
         width = width.toString()
     )
@@ -123,11 +124,11 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
     val images = dir.path.listDirectoryEntries()
         .filter { !it.isDirectory() && !it.name.startsWith(".") }.sorted()
         .map {
-            val thumbnail = SourcePath(it).toTarget().withSuffix(Size.THUMBNAIL.suffix)
+            val thumbnail = SourcePath(it).toTargetPhoto().withSuffix(Size.THUMBNAIL.suffix)
             val (width, height) = PhotoInfoCache.get(thumbnail)
             ImageModel(
-                pageUrl = SourcePath(it).toPhotoPagePath().name,
-                thumbUrl = thumbnail.name,
+                pageUrl = SourcePath(it).toPhotoDir().name + "/index.html",
+                thumbUrl = SourcePath(it).toPhotoDir().name + "/" + thumbnail.name,
                 caption = TargetPath(it).toCaption(),
                 height = height,
                 width = width

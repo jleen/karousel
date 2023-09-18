@@ -43,8 +43,10 @@ fun traverseDirectory(dir: SourcePath) {
 }
 
 fun createTargetDirectory(dir: SourcePath) = dir.toTarget().path.createDirectories()
+fun createPhotoDirectory(photo: SourcePath) = photo.toPhotoDir().path.createDirectories()
 
 fun traversePhoto(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
+    createPhotoDirectory(photo)
     renderPreview(photo)
     renderView(photo)
     renderFull(photo)
@@ -58,9 +60,9 @@ fun renderPreview(photo: SourcePath) = resizePhoto(photo, Size.THUMBNAIL)
 fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
 fun renderPhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
-    val target = photo.toPhotoPagePath()
+    val target = photo.toPhotoPage()
     if (isStale(photo, target)) {
-        templatePhotoPage(target, photo.toTarget(), prev?.toPhotoPagePath(), next?.toPhotoPagePath())
+        templatePhotoPage(target, photo.toTargetPhoto(), prev?.toPhotoPage(), next?.toPhotoPage())
         println("* $target")
     } else {
         println("  $target")
@@ -97,7 +99,7 @@ fun copyCss() {
 }
 
 fun copyPhoto(source: SourcePath) {
-    val target = source.toTarget()
+    val target = source.toTargetPhoto()
     conditionallyCopy(source, target)
 }
 
@@ -111,7 +113,12 @@ fun conditionallyCopy(source: SourcePath, target: TargetPath) {
 }
 
 fun resizePhoto(source: SourcePath, size: Size) {
-    val target = source.toTarget().withSuffix(size.suffix)
+    // TODO: Refactor this!
+    val target = when (size) {
+        Size.DIRECTORY -> source.toTarget().withSuffix(size.suffix)
+        else -> source.toTargetPhoto().withSuffix(size.suffix)
+    }
+
     if (isStale(source, target)) {
         val original = ImageIO.read(source.path.toFile())
         val (width, height) = size.computeScaledSize(original.width, original.height)

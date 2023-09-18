@@ -1,6 +1,7 @@
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.extension
+import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 
 class SourcePath(val path: Path) {
@@ -10,8 +11,14 @@ class SourcePath(val path: Path) {
         return TargetPath(target)
     }
 
-    fun toPhotoPagePath(): TargetPath =
-        TargetPath(Path(toTarget().toString().substringBeforeLast(".") + ".html"))
+    fun toPhotoDir(): TargetPath =
+        TargetPath(Path(toTarget().toString().substringBeforeLast(".")))
+
+    fun toPhotoPage(): TargetPath =
+        TargetPath(toPhotoDir().resolve("index.html"))
+
+    fun toTargetPhoto(): TargetPath =
+        TargetPath(toPhotoDir().resolve(path.name))
 
     override fun toString() = path.toString()
 }

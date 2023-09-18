@@ -103,7 +103,11 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
     //   At some point we might want to optimize by reusing the earlier traversal.
     val template = freemarkerConfig.getTemplate("IndexPage.ftl")
     val breadcrumbPath = targetRoot.relativize(page.parent.parent)
-    val crumbComponents = listOf(SITE_NAME) + breadcrumbPath.map { it.name }
+    val crumbComponents = when (breadcrumbPath.toString()) {
+        ".." -> listOf()
+        "" -> listOf(SITE_NAME)
+        else -> listOf(SITE_NAME) + breadcrumbPath.map { it.name }
+    }
     val numCrumbs = crumbComponents.size
     val breadcrumbs = crumbComponents.mapIndexed { i, comp ->
         val dots = "../".repeat(numCrumbs - i)
@@ -134,7 +138,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
         browsePrefix = if (browsePrefix.isNotEmpty()) "$browsePrefix/" else "",
         thisDir = page.toTitle(),
         breadcrumbs = breadcrumbs,
-        finalCrumb = TargetPath(page.parent).toTitle(),
+        finalCrumb = if (breadcrumbs.isEmpty()) SITE_NAME else TargetPath(page.parent).toTitle(),
         subDirs = subDirs,
         imgUrls = images,
     )

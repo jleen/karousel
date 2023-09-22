@@ -1,9 +1,5 @@
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.extension
-import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.pathString
+import kotlin.io.path.*
 
 class SourcePath(val path: Path) {
     private fun toTarget(): TargetPath {
@@ -18,7 +14,21 @@ class SourcePath(val path: Path) {
     fun toDirDir(): TargetPath = toTarget()
     fun toPhotoDir(): TargetPath = TargetPath(Path(toTarget().pathString.substringBeforeLast(".")))
     fun toPhotoPage(): TargetPath = TargetPath(toPhotoDir().resolve("index.html"))
-    fun toTargetPhoto(): TargetPath = TargetPath(toPhotoDir().resolve(path.name))
+    fun toTargetPhoto(): TargetPath {
+        val base = toTarget().nameWithoutExtension
+        val targetBase = if (isBoring(base)) {
+            val relative = targetRoot.relativize(toTarget().path)
+            val year = relative.getName(0)
+            val top = relative.getName(1)
+            val rest = relative.relativeTo(relative.subpath(0, 2)).parent
+            if (rest == null || rest.pathString.isEmpty()) "${top}_${year}_${base}"
+            else {
+                val restComps = rest.map(Path::pathString).joinToString("_")
+                "${top}_${year}_${restComps}_${base}"
+            }
+        } else base
+        return TargetPath(toPhotoDir().resolve("$targetBase.jpeg"))
+    }
     fun toScaledPhoto(size: Size): TargetPath = toTargetPhoto().withSuffix(size.suffix)
     fun toDirPreview(): TargetPath = TargetPath(toTarget().resolve(".preview.jpeg"))
     override fun toString(): String = path.pathString
@@ -35,13 +45,12 @@ class TargetPath(val path: Path) : Path by path {
         return toTitle(name)
     }
 
-    fun toCaption(): String = if (isSerial(path.nameWithoutExtension)) "" else toTitle()
+    fun toCaption(): String = if (isBoring(path.nameWithoutExtension)) "" else toTitle()
     override fun toString(): String = path.pathString
 }
 
 fun toTitle(name: String) = when {
     isSerial(name) -> name.substringAfterLast("_")
-    isBoring(name) -> ""
     else -> name.replace("_", " ").replace(Regex("""^\d\d """), "")
 }
 

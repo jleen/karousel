@@ -12,7 +12,7 @@ class SourcePath(val path: Path) {
         return TargetPath(target)
     }
 
-    private fun prettify(path: Path) = path
+    private fun prettify(path: Path) = Path(path.name.replace(Regex("""^\d\d_"""), ""))
 
     fun toIndexPage(): TargetPath = TargetPath(toTarget().resolve("index.html"))
     fun toDirDir(): TargetPath = toTarget()

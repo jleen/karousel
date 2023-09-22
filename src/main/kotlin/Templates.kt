@@ -37,8 +37,8 @@ class PhotoPageModel(
     val fullPhotoUrl: String,
     val framedPhotoUrl: String,
     val caption: String,
-    val height: String,
-    val width: String,
+    val height: Int,
+    val width: Int,
 )
 
 class IndexPageModel(
@@ -55,8 +55,8 @@ class SubDirModel(
     val dir: String,
     val name: String,
     val preview: String,
-    val height: Number,
-    val width: Number,
+    val height: Int,
+    val width: Int,
 )
 
 class ImageModel(
@@ -84,17 +84,17 @@ fun templatePhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
     val dirPath = photo.toPhotoDir()
     val model = PhotoPageModel(
         pageTitle = dirPath.toTitle(),
-        browsePrefix = page.parent.relativize(targetRoot).toString().replace('\\', '/'),
+        browsePrefix = page.parent.relativize(targetRoot).pathString.replace('\\', '/'),
         galleryTitle = SITE_NAME,
         breadcrumbs = breadcrumbs,
         finalCrumb = dirPath.toTitle(),
-        prev = prev?.let { page.parent.relativize(it.path).toString() },
-        next = next?.let { page.parent.relativize(it.path).toString() },
+        prev = prev?.let { page.parent.relativize(it.path).pathString },
+        next = next?.let { page.parent.relativize(it.path).pathString },
         fullPhotoUrl = photo.toTargetPhoto().name,
         framedPhotoUrl = viewPath.name,
         caption = dirPath.toCaption(),
-        height = height.toString(),
-        width = width.toString()
+        height = height,
+        width = width
     )
     template.process(model, page.path.writer())
 }
@@ -104,7 +104,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
     //   At some point we might want to optimize by reusing the earlier traversal.
     val template = freemarkerConfig.getTemplate("IndexPage.ftl")
     val breadcrumbPath = targetRoot.relativize(page.parent.parent)
-    val crumbComponents = when (breadcrumbPath.toString()) {
+    val crumbComponents = when (breadcrumbPath.pathString) {
         ".." -> listOf()
         "" -> listOf(SITE_NAME)
         else -> listOf(SITE_NAME) + breadcrumbPath.map { it.name }
@@ -118,7 +118,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
         val dirThumb = SourcePath(it).toDirPreview()
         val (width, height) = PhotoInfoCache.get(dirThumb)
         SubDirModel(dir = it.name, name = TargetPath(it).toCaption(),
-            preview = page.path.parent.relativize(dirThumb.path).toString().replace('\\', '/'),
+            preview = page.path.parent.relativize(dirThumb.path).pathString.replace('\\', '/'),
             height = height, width = width)
     }
     val images = dir.path.listDirectoryEntries()
@@ -134,7 +134,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
                 width = width
             )
     }
-    val browsePrefix = page.parent.relativize(targetRoot).toString().replace('\\', '/')
+    val browsePrefix = page.parent.relativize(targetRoot).pathString.replace('\\', '/')
     val model = IndexPageModel(
         galleryTitle = SITE_NAME,
         browsePrefix = if (browsePrefix.isNotEmpty()) "$browsePrefix/" else "",

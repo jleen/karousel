@@ -42,7 +42,7 @@ fun traverseDirectory(dir: SourcePath) {
     renderDirectoryPage(dir)
 }
 
-fun createTargetDirectory(dir: SourcePath) = dir.toTarget().path.createDirectories()
+fun createTargetDirectory(dir: SourcePath) = dir.toDirDir().path.createDirectories()
 fun createPhotoDirectory(photo: SourcePath) = photo.toPhotoDir().path.createDirectories()
 
 fun traversePhoto(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
@@ -60,17 +60,17 @@ fun renderPreview(photo: SourcePath) = resizePhoto(photo, Size.THUMBNAIL)
 fun renderView(photo: SourcePath) = resizePhoto(photo, Size.VIEW)
 
 fun renderPhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
-    val target = photo.toPhotoPage()
-    if (isStale(photo, target)) {
-        templatePhotoPage(target, photo.toTargetPhoto(), prev?.toPhotoPage(), next?.toPhotoPage())
-        println("* $target")
+    val photoPage = photo.toPhotoPage()
+    if (isStale(photo, photoPage)) {
+        templatePhotoPage(photo, prev, next)
+        println("* $photoPage")
     } else {
-        println("  $target")
+        println("  $photoPage")
     }
 }
 
 fun renderDirectoryPage(dir: SourcePath) {
-    val index = TargetPath(dir.toTarget().resolve("index.html"))
+    val index = TargetPath(dir.toIndexPage())
     if (isStale(dir, index)) {
         templateIndexPage(index, dir)
         println("* $index")
@@ -115,8 +115,8 @@ fun conditionallyCopy(source: SourcePath, target: TargetPath) {
 fun resizePhoto(source: SourcePath, size: Size) {
     // TODO: Refactor this!
     val target = when (size) {
-        Size.DIRECTORY -> source.toTarget().withSuffix(size.suffix)
-        else -> source.toTargetPhoto().withSuffix(size.suffix)
+        Size.DIRECTORY -> SourcePath(source.path.parent).toDirPreview()
+        else -> source.toScaledPhoto(size)
     }
 
     if (isStale(source, target)) {
@@ -135,7 +135,7 @@ fun resizePhoto(source: SourcePath, size: Size) {
 
         // Remember the dimensions of the original and resized images,
         // so that we can quickly emit them as part of HTML pages later.
-        PhotoInfoCache.put(source.toTarget(), Pair(original.width, original.height))
+        PhotoInfoCache.put(source.toTargetPhoto(), Pair(original.width, original.height))
         PhotoInfoCache.put(target, Pair(width, height))
     } else {
         println("  $target")

@@ -69,10 +69,10 @@ class ImageModel(
 
 private const val SITE_NAME = "Carousel"
 
-fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, next: TargetPath?) {
-    // TODO: All of the path handling needs to convert target paths to URLs.
+fun templatePhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
-    val viewPath = photo.withSuffix(Size.VIEW.suffix)
+    val viewPath = photo.toScaledPhoto(Size.VIEW)
+    val page = photo.toPhotoPage()
     val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
     val breadcrumbPath = targetRoot.relativize(page.parent.parent)
     val crumbComponents = listOf(SITE_NAME) + breadcrumbPath.map { it.name }
@@ -81,7 +81,7 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, ne
         val dots = "../".repeat(numCrumbs - i)
         BreadcrumbModel(toTitle(comp), dots)
     }
-    val dirPath = TargetPath(page.parent)
+    val dirPath = photo.toPhotoDir()
     val model = PhotoPageModel(
         pageTitle = dirPath.toTitle(),
         browsePrefix = page.parent.relativize(targetRoot).toString().replace('\\', '/'),
@@ -90,8 +90,8 @@ fun templatePhotoPage(page: TargetPath, photo: TargetPath, prev: TargetPath?, ne
         finalCrumb = dirPath.toTitle(),
         prev = prev?.let { page.parent.relativize(it.path).toString() },
         next = next?.let { page.parent.relativize(it.path).toString() },
-        fullPhotoUrl = photo.fileName.name,
-        framedPhotoUrl = viewPath.fileName.name,
+        fullPhotoUrl = photo.toTargetPhoto().name,
+        framedPhotoUrl = viewPath.name,
         caption = dirPath.toCaption(),
         height = height.toString(),
         width = width.toString()
@@ -115,7 +115,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
         BreadcrumbModel(toTitle(comp), dots)
     }
     val subDirs = dir.path.listDirectoryEntries().filter { it.isDirectory() }.sorted().map {
-        val dirThumb = SourcePath(it.resolve(".preview.jpeg")).toTarget().withSuffix(Size.DIRECTORY.suffix)
+        val dirThumb = SourcePath(it).toDirPreview()
         val (width, height) = PhotoInfoCache.get(dirThumb)
         SubDirModel(dir = it.name, name = TargetPath(it).toCaption(),
             preview = page.path.parent.relativize(dirThumb.path).toString().replace('\\', '/'),

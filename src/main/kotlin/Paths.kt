@@ -10,12 +10,12 @@ class SourcePath(val path: Path) {
 
     private fun prettify(path: Path) = Path(path.name.replace(Regex("""^\d\d_"""), ""))
 
-    fun toIndexPage(): TargetPath = TargetPath(toTarget().resolve("index.html"))
+    fun toIndexPage(): TargetPath = TargetPath(toTarget().path.resolve("index.html"))
     fun toDirDir(): TargetPath = toTarget()
-    fun toPhotoDir(): TargetPath = TargetPath(Path(toTarget().pathString.substringBeforeLast(".")))
-    fun toPhotoPage(): TargetPath = TargetPath(toPhotoDir().resolve("index.html"))
+    fun toPhotoDir(): TargetPath = TargetPath(Path(toTarget().path.pathString.substringBeforeLast(".")))
+    fun toPhotoPage(): TargetPath = TargetPath(toPhotoDir().path.resolve("index.html"))
     fun toTargetPhoto(): TargetPath {
-        val base = toTarget().nameWithoutExtension
+        val base = toTarget().path.nameWithoutExtension
         val targetBase = if (isBoring(base)) {
             val relative = targetRoot.relativize(toTarget().path)
             val year = relative.getName(0)
@@ -27,14 +27,14 @@ class SourcePath(val path: Path) {
                 "${top}_${year}_${restComps}_${base}"
             }
         } else base
-        return TargetPath(toPhotoDir().resolve("$targetBase.jpeg"))
+        return TargetPath(toPhotoDir().path.resolve("$targetBase.jpeg"))
     }
     fun toScaledPhoto(size: Size): TargetPath = toTargetPhoto().withSuffix(size.suffix)
-    fun toDirPreview(): TargetPath = TargetPath(toTarget().resolve(".preview.jpeg"))
+    fun toDirPreview(): TargetPath = TargetPath(toTarget().path.resolve(".preview.jpeg"))
     override fun toString(): String = path.pathString
 }
 
-class TargetPath(val path: Path) : Path by path {
+class TargetPath(val path: Path) {
     fun withSuffix(suffix: String): TargetPath {
         val nameWithSuffix = "${path.pathString.substringBeforeLast(".")}_$suffix.${path.extension}"
         return TargetPath(Path(nameWithSuffix))

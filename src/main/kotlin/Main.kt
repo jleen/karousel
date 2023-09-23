@@ -70,7 +70,7 @@ fun renderPhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
 }
 
 fun renderDirectoryPage(dir: SourcePath) {
-    val index = TargetPath(dir.toIndexPage())
+    val index = dir.toIndexPage()
     if (isStale(dir, index)) {
         templateIndexPage(index, dir)
         println("* $index")

@@ -73,8 +73,8 @@ fun templatePhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
     val template = freemarkerConfig.getTemplate("PhotoPage.ftl")
     val viewPath = photo.toScaledPhoto(Size.VIEW)
     val page = photo.toPhotoPage()
-    val (width, height) = PhotoInfoCache.get(TargetPath(viewPath))
-    val breadcrumbPath = targetRoot.relativize(page.parent.parent)
+    val (width, height) = PhotoInfoCache.get(viewPath)
+    val breadcrumbPath = targetRoot.relativize(page.path.parent.parent)
     val crumbComponents = listOf(SITE_NAME) + breadcrumbPath.map { it.name }
     val numCrumbs = crumbComponents.size
     val breadcrumbs = crumbComponents.mapIndexed { i, comp ->
@@ -84,14 +84,14 @@ fun templatePhotoPage(photo: SourcePath, prev: SourcePath?, next: SourcePath?) {
     val dirPath = photo.toPhotoDir()
     val model = PhotoPageModel(
         pageTitle = dirPath.toTitle(),
-        browsePrefix = page.parent.relativize(targetRoot).pathString.replace('\\', '/'),
+        browsePrefix = page.path.parent.relativize(targetRoot).pathString.replace('\\', '/'),
         galleryTitle = SITE_NAME,
         breadcrumbs = breadcrumbs,
         finalCrumb = dirPath.toTitle(),
-        prev = prev?.let { page.parent.relativize(it.toPhotoPage().path).pathString },
-        next = next?.let { page.parent.relativize(it.toPhotoPage().path).pathString },
-        fullPhotoUrl = photo.toTargetPhoto().name,
-        framedPhotoUrl = viewPath.name,
+        prev = prev?.let { page.path.parent.relativize(it.toPhotoDir().path).pathString + '/' },
+        next = next?.let { page.path.parent.relativize(it.toPhotoDir().path).pathString + '/' },
+        fullPhotoUrl = photo.toTargetPhoto().path.name,
+        framedPhotoUrl = viewPath.path.name,
         caption = dirPath.toCaption(),
         height = height,
         width = width
@@ -103,7 +103,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
     // TODO: For now we'll re-enumerate the directory.
     //   At some point we might want to optimize by reusing the earlier traversal.
     val template = freemarkerConfig.getTemplate("IndexPage.ftl")
-    val breadcrumbPath = targetRoot.relativize(page.parent.parent)
+    val breadcrumbPath = targetRoot.relativize(page.path.parent.parent)
     val crumbComponents = when (breadcrumbPath.pathString) {
         ".." -> listOf()
         "" -> listOf(SITE_NAME)
@@ -117,7 +117,7 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
     val subDirs = dir.path.listDirectoryEntries().filter { it.isDirectory() }.sorted().map {
         val dirThumb = SourcePath(it).toDirPreview()
         val (width, height) = PhotoInfoCache.get(dirThumb)
-        SubDirModel(dir = it.name, name = TargetPath(it).toCaption(),
+        SubDirModel(dir = SourcePath(it).toDirDir().path.name + '/', name = TargetPath(it).toCaption(),
             preview = page.path.parent.relativize(dirThumb.path).pathString.replace('\\', '/'),
             height = height, width = width)
     }
@@ -127,20 +127,20 @@ fun templateIndexPage(page: TargetPath, dir: SourcePath) {
             val thumbnail = SourcePath(it).toTargetPhoto().withSuffix(Size.THUMBNAIL.suffix)
             val (width, height) = PhotoInfoCache.get(thumbnail)
             ImageModel(
-                pageUrl = SourcePath(it).toPhotoDir().name + "/index.html",
-                thumbUrl = SourcePath(it).toPhotoDir().name + "/" + thumbnail.name,
+                pageUrl = SourcePath(it).toPhotoDir().path.name + "/",
+                thumbUrl = SourcePath(it).toPhotoDir().path.name + "/" + thumbnail.path.name,
                 caption = TargetPath(it).toCaption(),
                 height = height,
                 width = width
             )
     }
-    val browsePrefix = page.parent.relativize(targetRoot).pathString.replace('\\', '/')
+    val browsePrefix = page.path.parent.relativize(targetRoot).pathString.replace('\\', '/')
     val model = IndexPageModel(
         galleryTitle = SITE_NAME,
         browsePrefix = if (browsePrefix.isNotEmpty()) "$browsePrefix/" else "",
         thisDir = page.toTitle(),
         breadcrumbs = breadcrumbs,
-        finalCrumb = if (breadcrumbs.isEmpty()) SITE_NAME else TargetPath(page.parent).toTitle(),
+        finalCrumb = if (breadcrumbs.isEmpty()) SITE_NAME else TargetPath(page.path.parent).toTitle(),
         subDirs = subDirs,
         imgUrls = images,
     )

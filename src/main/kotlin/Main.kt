@@ -1,4 +1,5 @@
 import com.twelvemonkeys.image.ResampleOp
+import java.nio.file.Files.isDirectory
 import javax.imageio.IIOImage
 import javax.imageio.ImageIO
 import javax.imageio.ImageWriteParam
@@ -35,7 +36,7 @@ fun traverseDirectory(dir: SourcePath) {
     }
     val preview = dir.path.resolve(".preview.jpeg")
     if (preview.exists()) resizePhoto(SourcePath(preview), Size.DIRECTORY)
-    dir.path.listDirectoryEntries().sorted().filter { it.isDirectory() }.forEach { traverseDirectory(SourcePath(it)) }
+    dir.path.listDirectoryEntries().sorted().filter(::isDirectory).forEach { traverseDirectory(SourcePath(it)) }
 
     // Now that we have done all the child directories (which includes their previews)
     // we can proceed to render the parent directory's index.

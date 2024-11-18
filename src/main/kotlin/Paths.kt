@@ -2,11 +2,7 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 class SourcePath(val path: Path) {
-    private fun toTarget(): TargetPath {
-        val relative = sourceRoot.relativize(path)
-        val target = relative.map(::prettify).fold(targetRoot, Path::resolve)
-        return TargetPath(target)
-    }
+    private fun toTarget() = sourceRoot.relativize(path).map(::prettify).fold(targetRoot, Path::resolve).let(::TargetPath)
 
     private fun prettify(path: Path) = Path(path.name.replace(Regex("""^\d\d_"""), ""))
 
